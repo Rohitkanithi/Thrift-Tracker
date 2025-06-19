@@ -1,0 +1,39 @@
+# Docker Compose file format.
+version: '3.8'
+
+# This is the main section where we define all our services (containers).
+services:
+  # We are defining a single service and naming it 'db'.
+  db:
+    # Specifies the Docker image to use. We are pulling PostgreSQL version 15.
+    # Using a specific version instead of 'latest' is a best practice for stability.
+    image: postgres:15
+
+    # custom name for our running container.
+    container_name: thrift-tracker-db
+
+    # This policy ensures the container restarts automatically if it ever stops.
+    restart: always
+
+    # This section sets environment variables inside the PostgreSQL container.
+    # This is how we configure the database on its first run.
+    # IMPORTANT: Replace the placeholder values with your own secure credentials.
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: thrift_tracker_dev   # The name of our development database
+
+    # This maps a port from our host machine to a port inside the container.
+    # Format is 'HOST_PORT:CONTAINER_PORT'.
+    # This lets our Spring Boot app connect to localhost:5432 to talk to the database.
+    ports:
+      - "5433:5432"
+
+    # This is CRITICAL for data persistence. It ensures our database data
+    # is stored safely on our machine, even if we remove or recreate the container.
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+# This top-level key declares the named volume we referenced above.
+volumes:
+  postgres_data:

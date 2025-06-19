@@ -1,0 +1,21 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+
+# IDE files
+.idea/
+
+# Maven build output
+/server/target/
+
+# Node dependencies
+/client/node_modules/
+
+# Log files
+*.log
+
+# Mac-specific
+.DS_Store
+
+# Ignore local environment variables file
+.env
