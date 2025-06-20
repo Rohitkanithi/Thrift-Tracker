@@ -1,10 +1,15 @@
 package com.thrifttracker.server.auth;
 
+import com.thrifttracker.server.auth.dto.AuthResponseDto;
+import com.thrifttracker.server.auth.dto.LoginDto;
 import com.thrifttracker.server.auth.dto.RegisterUserDto;
 import com.thrifttracker.server.auth.dto.UserDto;
 import com.thrifttracker.server.user.User;
+import com.thrifttracker.server.user.UserMapper;
 import com.thrifttracker.server.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +24,8 @@ public class AuthService {
     // By declaring them as 'final', we ensure they are initialized once via the constructor.
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+    private final AuthenticationManager authenticationManager;
 
     // Because we use @RequiredArgsConstructor, Spring will automatically "inject" the
     // UserRepository and PasswordEncoder beans that it has in its context.
@@ -64,6 +71,37 @@ public class AuthService {
         userDto.setPhoneNumber(savedUser.getPhoneNumber());
         userDto.setCreatedAt(savedUser.getCreatedAt());
 
-        return userDto;
+        return UserMapper.toUserDto(savedUser);
+    }
+
+    // New LOGIN METHOD
+    public AuthResponseDto login(LoginDto loginDto) {
+        // Step 1: Use the AuthenticationManager to validate the user's credentials.
+        // This will internally use our UserDetailsService and PasswordEncoder to check if the user exists and the password is correct.
+        // If the credentials are bad, it will throw an AuthenticationException, and the method will stop here.
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        loginDto.getEmail(),
+                        loginDto.getPassword()
+                )
+        );
+
+        // Step 2: If authentication was successful, find the user in the database.
+        // We need the full User object to generate a token for them.
+        var authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        loginDto.getEmail(),
+                        loginDto.getPassword()
+                )
+        );
+
+        var user = (User) authentication.getPrincipal();
+        // Step 3: Generate a JWT for the validated user.
+        var jwtToken = jwtService.generateToken(user);
+
+        // Step 4: Return the token in our AuthResponseDto.
+        return AuthResponseDto.builder()
+                .token(jwtToken)
+                .build();
     }
 }

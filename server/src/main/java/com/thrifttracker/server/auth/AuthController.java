@@ -1,5 +1,7 @@
 package com.thrifttracker.server.auth;
 
+import com.thrifttracker.server.auth.dto.AuthResponseDto;
+import com.thrifttracker.server.auth.dto.LoginDto;
 import com.thrifttracker.server.auth.dto.RegisterUserDto;
 import com.thrifttracker.server.auth.dto.UserDto;
 import jakarta.validation.Valid;
@@ -39,5 +41,14 @@ public class AuthController {
         // We return a ResponseEntity to have full control over the HTTP response,
         // setting the status to 201 CREATED for successful resource creation.
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
+    }
+
+    // New LOGIN ENDPOINT
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponseDto> login(@RequestBody LoginDto loginDto) {
+        // The controller's job is simple: delegate the work to the service...
+        AuthResponseDto response = authService.login(loginDto);
+        // ...and return the result with a 200 OK status.
+        return ResponseEntity.ok(response);
     }
 }

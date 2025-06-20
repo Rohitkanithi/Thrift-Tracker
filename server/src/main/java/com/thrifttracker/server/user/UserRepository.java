@@ -4,13 +4,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * This is the Repository interface for our User entity.
  * It extends JpaRepository, which provides a rich set of methods for CRUD operations.
  */
 @Repository // This annotation tells Spring that this is a Repository bean.
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, UUID> {
     // JpaRepository<User, Long> means this repository is for the 'User' entity,
     // and the type of the primary key is 'Long'.
 
